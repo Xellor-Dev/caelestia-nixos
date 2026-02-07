@@ -1,7 +1,7 @@
 {...}: {
   # Apps
   terminal = "foot";
-  browser = "zen-browser";
+  browser = "firefox";
   editor = "codium";
   fileExplorer = "thunar";
 
