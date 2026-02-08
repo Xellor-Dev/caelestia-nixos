@@ -19,23 +19,23 @@
         "authProviderSpecific"
       ]
     | .defaultAccount = (.defaultAccount // {
-        authenticationProvider = {
-          id = "github";
-          enterpriseProviderId = "github-enterprise";
-          enterpriseProviderConfig = "github.copilot.advanced.authProvider";
-          enterpriseProviderUriSetting = "github-enterprise.uri";
-          scopes = [
+        "authenticationProvider": {
+          "id": "github",
+          "enterpriseProviderId": "github-enterprise",
+          "enterpriseProviderConfig": "github.copilot.advanced.authProvider",
+          "enterpriseProviderUriSetting": "github-enterprise.uri",
+          "scopes": [
             ["user:email"],
             ["read:user"],
             ["read:user", "user:email", "repo", "workflow"]
-          ];
-        };
-        chatEntitlementUrl = "https://api.github.com/copilot_internal/user";
-        tokenEntitlementUrl = "https://api.github.com/copilot_internal/v2/token";
-        mcpRegistryDataUrl = "https://api.github.com/copilot/mcp_registry";
+          ]
+        },
+        "chatEntitlementUrl": "https://api.github.com/copilot_internal/user",
+        "tokenEntitlementUrl": "https://api.github.com/copilot_internal/v2/token",
+        "mcpRegistryDataUrl": "https://api.github.com/copilot/mcp_registry"
       })
     | .inheritAuthAccountPreference = (.inheritAuthAccountPreference // {
-        "github.copilot" = ["github.copilot-chat"];
+        "github.copilot": ["github.copilot-chat"]
       })
     | .extensionEnabledApiProposals["GitHub.copilot-chat"] = (
         .extensionEnabledApiProposals["GitHub.copilot-chat"] // [
