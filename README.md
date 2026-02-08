@@ -1,72 +1,170 @@
-# caelestia.nix
+# caelestianix
 
-This home-manager module provides a declarative way to install and configure [caelestia-dots](https://github.com/caelestia-dots/caelestia) using Nix flakes. It includes default configurations from the caelestia-dots repository, written in Nix, and allows easy customization.
+**A declarative Home Manager framework for [caelestia-dots](https://github.com/caelestia-dots/caelestia) on NixOS.**
+
+Caelestianix brings the beautiful caelestia dotfiles ecosystem into the reproducible world of Nix Flakes. Configure your entire desktop environment — Hyprland, terminal tools, editors, and more — using pure Nix expressions with deep customization support.
+
+> [!NOTE]
+> This is a fork of [caelestia-nix](https://github.com/Markus328/caelestia-nix) with significant enhancements for editor integrations and usability.
+
+## ✨ Key Features
+
+- **Declarative Configuration**: All dotfiles managed as Nix modules with type safety
+- **Deep Customization**: Override any setting using infuse.nix sugars (`__prepend`, `__append`, etc.)
+- **Modular Architecture**: Enable only what you need — Hyprland, editors, terminal, btop, etc.
+- **VSCode/VSCodium Integration**: Full GitHub Copilot support with automatic configuration
+- **Multiple Editors**: First-class support for VSCode, Zed, and Micro
+- **Reproducible**: Lock dotfiles versions with flake.lock
+
+## 🔄 What's New in This Fork
+
+This fork extends the original caelestia-nix with:
+
+- **VSCode/VSCodium Full Support**
+    - GitHub Copilot enabled out-of-the-box
+    - Automatic product.json patching for authentication
+    - Writable settings.json for extension compatibility
+    - VS Marketplace integration
+- **Enhanced Editor Modules**
+    - Added Zed editor configuration
+    - Added Micro editor support
+    - Unified editor interface under `programs.caelestia-dots.editor.*`
+
+- **Hyprland 0.53+ Compatibility**
+    - Updated rules and misc settings for latest Hyprland syntax
+- **Improved Shell Integration**
+    - Fixed settings path handling for caelestia shell modules
 
 > [!WARNING]
-> This module is in a very experimental stage. Many features and modules are still missing, and breaking changes may occur frequently.
+> This module is in active development. Breaking changes may occur frequently as we refine the API.
 
-## Installation
+## 🚀 Installation
 
-Add `caelestia-nix` (this repository) and `home-manager` as inputs to your flake, and include the module in your home configuration.
+Add `caelestianix` and `home-manager` as inputs to your flake, then include the module in your home configuration.
 
 ### Example `flake.nix`:
 
 ```nix
+{
+  description = "My NixOS configuration with caelestianix";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager.url = "github:nix-community/home-manager";
+    caelestianix.url = "github:Xellor-Dev/caelestia-nixos";
+  };
+
+  outputs = { self, nixpkgs, home-manager, caelestianix, ... }@inputs:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs { inherit system; };
+    in {
+      homeConfigurations."user@nixos" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [
+          ./home.nix
+          caelestianix.homeManagerModules.default
+        ];
+      };
+    };
+}
+```
+
+### Basic `home.nix`:
+
+```nix
+{ config, pkgs, ... }:
 
 {
-  description = "A caelestia-nix test";
-  inputs = {
-    nixpkgs = {
-      url = "github:NixOS/nixpkgs";
-    };
-    caelestia-nix.url = "github:Markus328/caelestia-nix";
-    home-manager.url = "github:nix-community/home-manager";
-  };
-  outputs = inputs @ {
-    self,
-    nixpkgs,
-    ...
-  }: let
-    system = "x86_64-linux"; # Your system here
-    pkgs = import nixpkgs {
-      inherit system;
-    };
-  in rec {
-    homeConfigurations."user@nixos" = inputs.home-manager.lib.homeManagerConfiguration {
-      inherit pkgs;
-      modules = [./home.nix inputs.caelestia-nix.homeManagerModules.default];
-    };
+  programs.caelestia-dots = {
+    enable = true;
+
+    # Optional: enable specific components
+    hypr.enable = true;
+    editor.vscode.enable = true;
+    term.enable = true;
+    btop.enable = true;
   };
 }
 ```
 
-## Customization
+## ⚙️ Customization
 
-This module provides default configurations from caelestia-dots. For now, simply enabling the module is enough:
+Caelestianix provides rich customization through the `settings` attribute and infuse.nix sugars.
 
-```nix
-programs.caelestia-dots.enable = true;
-```
-
-You can also deeply configure each module using its "settings" option, such as:
+### Basic Configuration
 
 ```nix
-  programs.caelestia-dots = {
+programs.caelestia-dots = {
+  enable = true;
+
+  # Hyprland keybindings
+  hypr.hyprland.keybinds.settings.bind = [
+    "SUPER, Return, exec, footclient"
+    "SUPER SHIFT, Q, killactive"
+  ];
+
+  # Shell configuration
+  caelestia.shell.settings = {
+    launcher.actionPrefix = ".";
+    battery.warnLevels.__prepend = [
+      {
+        level = 80;
+        title = "High Battery";
+        message = "Consider unplugging for battery health";
+        icon = "battery_android_frame_5";
+      }
+    ];
+  };
+
+  # VSCode with Copilot
+  editor.vscode = {
     enable = true;
-    hypr.hyprland.keybinds.settings.bind = ["Ctrl+Alt, a, exec, footclient"]; # Appends new bind
-    caelestia.shell.settings = {
-      launcher.actionPrefix = "."; # Set a value
-      battery.warnLevels.__prepend = [ # Prepending to the defaults, without rewriting them all
-          {
-            level = 80;
-            title = "High Battery";
-            message = "Consider unpluging the charger for the battery safety";
-            icon = "battery_android_frame_5";
-          }
-        ]; # Warn when 80% of battery
+    settings.userSettings = {
+      "editor.fontSize" = 14;
+      "workbench.colorTheme" = "Tokyo Night";
     };
   };
+};
 ```
+
+### Advanced: Infuse.nix Sugars
+
+Use special keywords to modify nested configurations without rewriting defaults:
+
+- `__prepend` - Add to beginning of list
+- `__append` - Add to end of list
+- `__override` - Replace entire value
+- `__delete` - Remove a key
+
+See [CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for complete documentation.
+
+## 📦 Available Modules
+
+| Module            | Description                                   | Status      |
+| ----------------- | --------------------------------------------- | ----------- |
+| `hypr`            | Hyprland window manager + variables + schemes | ✅ Stable   |
+| `caelestia.shell` | Caelestia shell integration                   | ✅ Stable   |
+| `caelestia.cli`   | CLI tools configuration                       | ✅ Stable   |
+| `editor.vscode`   | VSCode/VSCodium + Copilot                     | ✅ Enhanced |
+| `editor.zed`      | Zed editor                                    | ✅ New      |
+| `editor.micro`    | Micro terminal editor                         | ✅ New      |
+| `term`            | Terminal tools (fish, eza, starship)          | ✅ Stable   |
+| `btop`            | System monitor                                | ✅ Stable   |
+| `foot`            | Foot terminal emulator                        | ✅ Stable   |
+
+## 🙏 Credits
+
+- [caelestia-dots](https://github.com/caelestia-dots/caelestia) - The amazing dotfiles that inspired this project
+- [caelestia-nix](https://github.com/Markus328/caelestia-nix) - Original Home Manager module by Markus328
+- [infuse.nix](https://codeberg.org/amjoseph/infuse.nix) - Deep configuration merging magic
+- [Home Manager](https://github.com/nix-community/home-manager) - Declarative dotfiles management
+
+## 📄 License
+
+This project inherits the license from the original caelestia-nix project.
+
+---
 
 <br>
 
