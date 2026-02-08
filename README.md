@@ -175,4 +175,3 @@ You can configure like you configure any other module option, but you have extra
 - [caelestia-dots](https://github.com/caelestia-dots/caelestia), awesome dotfiles and shell
 - [infuse.nix](https://codeberg.org/amjoseph/infuse.nix), greatly enhances customization
 
-test
