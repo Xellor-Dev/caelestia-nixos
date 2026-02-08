@@ -178,6 +178,7 @@ in {
       llvm-vs-code-extensions.vscode-clangd
       charliermarsh.ruff
       esbenp.prettier-vscode
+      github.vscode-pull-request-github
       github.copilot
       github.copilot-chat
       (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
