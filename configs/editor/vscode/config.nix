@@ -3,7 +3,38 @@
   pkgs,
   ...
 }: {
-  package = pkgs.vscodium;
+  package = pkgs.vscodium.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.jq ];
+    postInstall = (old.postInstall or "") + ''
+      product_json=$(find "$out" -path "*/resources/app/product.json" -print -quit)
+      if [ -n "$product_json" ]; then
+        tmp=$(mktemp)
+        ${pkgs.jq}/bin/jq '
+          .extensionEnabledApiProposals = (.extensionEnabledApiProposals // {})
+          | .extensionEnabledApiProposals."GitHub.copilot" = [
+              "inlineCompletions",
+              "inlineCompletionsNew",
+              "inlineCompletionsAdditions",
+              "textDocumentNotebook",
+              "interactive",
+              "interactiveUserActions",
+              "terminalDataWriteEvent"
+            ]
+          | .extensionEnabledApiProposals."GitHub.copilot-chat" = (
+              .extensionEnabledApiProposals."GitHub.copilot-chat" // [
+                "interactive",
+                "interactiveUserActions"
+              ]
+            )
+          | .trustedExtensionAuthAccess = ((.trustedExtensionAuthAccess // []) + [
+              "github.copilot",
+              "github.copilot-chat"
+            ] | unique)
+        ' "$product_json" > "$tmp"
+        mv "$tmp" "$product_json"
+      fi
+    '';
+  });
 
   # Using a profile other than default probably will break the caelestia-integration extension
   profiles.default = {
@@ -98,6 +129,8 @@
       llvm-vs-code-extensions.vscode-clangd
       charliermarsh.ruff
       esbenp.prettier-vscode
+      github.copilot
+      github.copilot-chat
       (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
         mktplcRef = {
           name = "qt-qml";
