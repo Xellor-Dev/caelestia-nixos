@@ -96,6 +96,7 @@ in {
         fish = true;
         qml = true;
       };
+      "chat.disableAIFeatures" = false;
       "diffEditor.hideUnchangedRegions.enabled" = true;
       "doxdocgen.generic.boolReturnsTrueFalse" = false;
       "editor.codeActionsOnSave" = {
@@ -112,6 +113,12 @@ in {
       "editor.smoothScrolling" = true;
       "editor.suggestSelection" = "recentlyUsedByPrefix";
       "git.enableSmartCommit" = true;
+      "github.copilot.enable" = {
+        "*" = true;
+      };
+      "github.copilot.advanced.authProvider" = "github";
+      "github.copilot.editor.enableAutoCompletions" = true;
+      "github.copilot.chat.enabled" = true;
       "javascript.preferences.importModuleSpecifierEnding" = "minimal";
       "prettier.arrowParens" = "avoid";
       "prettier.printWidth" = 120;

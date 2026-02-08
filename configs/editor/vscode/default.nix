@@ -20,5 +20,23 @@ in {
       cp -Lr --update=none ${caelesita-vscode-integration}/share/vscode/extensions/* ${vscodeExtDir}/${extUniqueId}
       chmod -R 755 ${vscodeExtDir}/${extUniqueId}
     '';
+
+    # Make settings.json writable by replacing HM symlink with a real file.
+    # This allows extensions (e.g., Copilot) to update settings, but future
+    # declarative updates to userSettings won't be applied automatically.
+    home.activation.caelestiaDotsWritableVscodeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      settings_dir="${config.xdg.configHome}/${config.programs.vscode.dataFolderName}/User"
+      settings_file="$settings_dir/settings.json"
+
+      if [ -L "$settings_file" ]; then
+        tmp=$(mktemp)
+        cp -L "$settings_file" "$tmp"
+        rm -f "$settings_file"
+        mkdir -p "$settings_dir"
+        cp "$tmp" "$settings_file"
+        chmod 644 "$settings_file"
+        rm -f "$tmp"
+      fi
+    '';
   };
 }
