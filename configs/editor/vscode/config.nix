@@ -14,6 +14,10 @@
         "interactiveUserActions",
         "terminalDataWriteEvent"
       ]
+    | .extensionEnabledApiProposals["vscode.github-authentication"] = [
+        "authIssuers",
+        "authProviderSpecific"
+      ]
     | .extensionEnabledApiProposals["GitHub.copilot-chat"] = (
         .extensionEnabledApiProposals["GitHub.copilot-chat"] // [
           "interactive",
