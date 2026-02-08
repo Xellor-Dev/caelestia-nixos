@@ -37,6 +37,16 @@
     | .inheritAuthAccountPreference = (.inheritAuthAccountPreference // {
         "github.copilot": ["github.copilot-chat"]
       })
+    | .extensionsGallery = (.extensionsGallery // {
+        "nlsBaseUrl": "https://www.vscode-unpkg.net/_lp/",
+        "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
+        "itemUrl": "https://marketplace.visualstudio.com/items",
+        "publisherUrl": "https://marketplace.visualstudio.com/publishers",
+        "resourceUrlTemplate": "https://{publisher}.vscode-unpkg.net/{publisher}/{name}/{version}/{path}",
+        "extensionUrlTemplate": "https://www.vscode-unpkg.net/_gallery/{publisher}/{name}/latest",
+        "controlUrl": "https://main.vscode-cdn.net/extensions/marketplace.json",
+        "mcpUrl": "https://main.vscode-cdn.net/mcp/servers.json"
+      })
     | .extensionEnabledApiProposals["GitHub.copilot-chat"] = (
         .extensionEnabledApiProposals["GitHub.copilot-chat"] // [
           "interactive",
