@@ -2,40 +2,42 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  copilotPatchFilter = pkgs.writeText "copilot-patch.jq" ''
+    .extensionEnabledApiProposals = (.extensionEnabledApiProposals // {})
+    | .extensionEnabledApiProposals["GitHub.copilot"] = [
+        "inlineCompletions",
+        "inlineCompletionsNew",
+        "inlineCompletionsAdditions",
+        "textDocumentNotebook",
+        "interactive",
+        "interactiveUserActions",
+        "terminalDataWriteEvent"
+      ]
+    | .extensionEnabledApiProposals["GitHub.copilot-chat"] = (
+        .extensionEnabledApiProposals["GitHub.copilot-chat"] // [
+          "interactive",
+          "interactiveUserActions"
+        ]
+      )
+    | .trustedExtensionAuthAccess = (.trustedExtensionAuthAccess // {})
+    | .trustedExtensionAuthAccess.github = ((.trustedExtensionAuthAccess.github // []) + [
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ] | unique)
+    | .trustedExtensionAuthAccess["github-enterprise"] = ((.trustedExtensionAuthAccess["github-enterprise"] // []) + [
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ] | unique)
+  '';
+in {
   package = pkgs.vscodium.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.jq ];
     postInstall = (old.postInstall or "") + ''
       product_json=$(find "$out" -path "*/resources/app/product.json" -print -quit)
       if [ -n "$product_json" ]; then
         tmp=$(mktemp)
-        ${pkgs.jq}/bin/jq '\
-          .extensionEnabledApiProposals = (.extensionEnabledApiProposals // {})\
-          | .extensionEnabledApiProposals."GitHub.copilot" = [\
-              "inlineCompletions",\
-              "inlineCompletionsNew",\
-              "inlineCompletionsAdditions",\
-              "textDocumentNotebook",\
-              "interactive",\
-              "interactiveUserActions",\
-              "terminalDataWriteEvent"\
-            ]\
-          | .extensionEnabledApiProposals."GitHub.copilot-chat" = (\
-              .extensionEnabledApiProposals."GitHub.copilot-chat" // [\
-                "interactive",\
-                "interactiveUserActions"\
-              ]\
-            )\
-          | .trustedExtensionAuthAccess = (.trustedExtensionAuthAccess // {})\
-          | .trustedExtensionAuthAccess.github = ((.trustedExtensionAuthAccess.github // []) + [\
-              "GitHub.copilot",\
-              "GitHub.copilot-chat"\
-            ] | unique)\
-          | .trustedExtensionAuthAccess."github-enterprise" = ((.trustedExtensionAuthAccess."github-enterprise" // []) + [\
-              "GitHub.copilot",\
-              "GitHub.copilot-chat"\
-            ] | unique)\
-        ' "$product_json" > "$tmp"\
+        ${pkgs.jq}/bin/jq -f ${copilotPatchFilter} "$product_json" > "$tmp"
         mv "$tmp" "$product_json"
       fi
     '';
