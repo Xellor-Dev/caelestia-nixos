@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  mod,
-  ...
+{ config
+, lib
+, mod
+, ...
 }: {
   config = {
     programs.eza = mod;

@@ -1,9 +1,9 @@
-{
-  lib,
-  pkgs,
-  upstream,
-  ...
-}: let
+{ lib
+, pkgs
+, upstream
+, ...
+}:
+let
   copilotPatchFilter = pkgs.writeText "copilot-patch.jq" ''
     .extensionEnabledApiProposals = (.extensionEnabledApiProposals // {})
     | .extensionEnabledApiProposals["GitHub.copilot"] = [
@@ -66,9 +66,10 @@
         "GitHub.copilot-chat"
       ] | unique)
   '';
-in {
+in
+{
   package = pkgs.vscodium.overrideAttrs (old: {
-    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.jq ];
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.jq ];
     postInstall = (old.postInstall or "") + ''
       product_json=$(find "$out" -path "*/resources/app/product.json" -print -quit)
       if [ -n "$product_json" ]; then
@@ -88,13 +89,13 @@ in {
           then "${upstream}/vscode/settings.json"
           else null;
       in
-        if settingsJsonPath != null && builtins.pathExists settingsJsonPath then
-          builtins.fromJSON (builtins.readFile settingsJsonPath)
-        else
-          lib.warn "caelestia-dots: upstream vscode/settings.json not found, using minimal defaults." {
-            "workbench.colorTheme" = "Caelestia";
-            "workbench.iconTheme" = "catppuccin-mocha";
-          };
+      if settingsJsonPath != null && builtins.pathExists settingsJsonPath then
+        builtins.fromJSON (builtins.readFile settingsJsonPath)
+      else
+        lib.warn "caelestia-dots: upstream vscode/settings.json not found, using minimal defaults." {
+          "workbench.colorTheme" = "Caelestia";
+          "workbench.iconTheme" = "catppuccin-mocha";
+        };
 
     keybindings =
       let
@@ -103,15 +104,15 @@ in {
           then "${upstream}/vscode/keybindings.json"
           else null;
       in
-        if keybindingsJsonPath != null && builtins.pathExists keybindingsJsonPath then
-          builtins.fromJSON (builtins.readFile keybindingsJsonPath)
-        else
-          lib.warn "caelestia-dots: upstream vscode/keybindings.json not found, using minimal defaults." [
-            {
-              command = "workbench.action.reloadWindow";
-              key = "ctrl+shift+alt+r";
-            }
-          ];
+      if keybindingsJsonPath != null && builtins.pathExists keybindingsJsonPath then
+        builtins.fromJSON (builtins.readFile keybindingsJsonPath)
+      else
+        lib.warn "caelestia-dots: upstream vscode/keybindings.json not found, using minimal defaults." [
+          {
+            command = "workbench.action.reloadWindow";
+            key = "ctrl+shift+alt+r";
+          }
+        ];
 
     extensions = with pkgs.vscode-extensions; [
       catppuccin.catppuccin-vsc-icons

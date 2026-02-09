@@ -1,16 +1,16 @@
-{pkgs, ...}: {
-  extensions = ["nix" "qml"];
-  extraPackages = with pkgs; [kdePackages.qtdeclarative alejandra nixd];
+{ pkgs, ... }: {
+  extensions = [ "nix" "qml" ];
+  extraPackages = with pkgs; [ kdePackages.qtdeclarative alejandra nixd ];
   userKeymaps = [
     {
       bindings = {
         alt-down = [
           "editor::SelectNext"
-          {replace_newest = false;}
+          { replace_newest = false; }
         ];
         alt-up = [
           "editor::SelectPrevious"
-          {replace_newest = false;}
+          { replace_newest = false; }
         ];
         ctrl-shift-down = "editor::MoveLineDown";
         ctrl-shift-up = "editor::MoveLineUp";
@@ -44,7 +44,7 @@
       nixd = {
         settings = {
           formatting = {
-            command = ["alejandra"];
+            command = [ "alejandra" ];
           };
           nixpkgs = {
             expr = "import (builtins.getFlake (builtins.toString ./.)).inputs.nixpkgs {}";
@@ -53,16 +53,23 @@
       };
       qml = {
         binary = {
-          arguments = ["-E"];
+          arguments = [ "-E" ];
         };
       };
     };
-    multi_cursor_modifier = "cmd_or_ctrl";
-    theme = {
-      dark = "One Dark";
-      light = "One Light";
-      mode = "system";
+    discord-presence-lsp = {
+      binary = "steam-run";
+      arguments = [
+        "/home/xellor/.local/share/zed/extensions/work/discord-presence/discord-presence-lsp-v0.10.0/discord-presence-lsp-x86_64-unknown-linux-gnu/discord-presence-lsp"
+      ];
     };
-    ui_font_size = 16;
   };
+  multi_cursor_modifier = "cmd_or_ctrl";
+  theme = {
+    dark = "One Dark";
+    light = "One Light";
+    mode = "system";
+  };
+  ui_font_size = 16;
+};
 }

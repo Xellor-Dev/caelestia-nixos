@@ -1,9 +1,8 @@
-{
-  config,
-  lib,
-  mod,
-  pkgs,
-  ...
+{ config
+, lib
+, mod
+, pkgs
+, ...
 }: {
   config = {
     programs.caelestia.enable = true;

@@ -1,8 +1,7 @@
-{
-  config,
-  mod,
-  lib,
-  ...
+{ config
+, mod
+, lib
+, ...
 }: {
   "$hypr" = "${config.xdg.configHome}/hypr";
   "$hl" = "${config.xdg.configHome}/hypr/hyprland";

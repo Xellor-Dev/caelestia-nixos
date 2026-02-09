@@ -1,4 +1,4 @@
-{vscode-utils, fetchurl, ...}:
+{ vscode-utils, fetchurl, ... }:
 vscode-utils.buildVscodeExtension rec {
   pname = "caelestia-integration";
   version = "1.2.0";

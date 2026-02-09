@@ -1,73 +1,76 @@
-{lib, upstream, ...}: let
-  parser = import ../hyprconf-parser.nix {inherit lib;};
+{ lib, upstream, ... }:
+let
+  parser = import ../hyprconf-parser.nix { inherit lib; };
 
   upstreamVars =
     if upstream != null && builtins.pathExists "${upstream}/hypr/variables.conf"
     then parser.parseVars (builtins.readFile "${upstream}/hypr/variables.conf")
-    else lib.warn "caelestia-nixos: upstream hypr/variables.conf not found, using fallback defaults" {
-      terminal = "foot";
-      browser = "firefox";
-      editor = "codium";
-      fileExplorer = "thunar";
-      touchpadDisableTyping = true;
-      touchpadScrollFactor = 0.3;
-      workspaceSwipeFingers = 4;
-      gestureFingers = 3;
-      gestureFingersMore = 4;
-      blurEnabled = true;
-      blurSpecialWs = false;
-      blurPopups = true;
-      blurInputMethods = true;
-      blurSize = 8;
-      blurPasses = 2;
-      blurXray = false;
-      shadowEnabled = true;
-      shadowRange = 20;
-      shadowRenderPower = 3;
-      shadowColour = "rgba($surfaced4)";
-      workspaceGaps = 20;
-      windowGapsIn = 10;
-      windowGapsOut = 40;
-      singleWindowGapsOut = 20;
-      windowOpacity = 0.95;
-      windowRounding = 10;
-      windowBorderSize = 3;
-      activeWindowBorderColour = "rgba($primarye6)";
-      inactiveWindowBorderColour = "rgba($onSurfaceVariant11)";
-      volumeStep = 10;
-      cursorTheme = "Sweet-cursors";
-      cursorSize = 24;
-      kbMoveWinToWs = "Super+Alt";
-      kbMoveWinToWsGroup = "Ctrl+Super+Alt";
-      kbGoToWs = "Super";
-      kbGoToWsGroup = "Ctrl+Super";
-      kbNextWs = "Ctrl+Super, right";
-      kbPrevWs = "Ctrl+Super, left";
-      kbToggleSpecialWs = "Super, S";
-      kbWindowGroupCycleNext = "Alt, Tab";
-      kbWindowGroupCyclePrev = "Shift+Alt, Tab";
-      kbUngroup = "Super, U";
-      kbToggleGroup = "Super, Comma";
-      kbMoveWindow = "Super, Z";
-      kbResizeWindow = "Super, X";
-      kbWindowPip = "Super+Alt, Backslash";
-      kbPinWindow = "Super, P";
-      kbWindowFullscreen = "Super, F";
-      kbWindowBorderedFullscreen = "Super+Alt, F";
-      kbToggleWindowFloating = "Super+Alt, Space";
-      kbCloseWindow = "Super, Q";
-      kbSystemMonitor = "Ctrl+Shift, Escape";
-      kbMusic = "Super, M";
-      kbCommunication = "Super, D";
-      kbTodo = "Super, R";
-      kbTerminal = "Super, T";
-      kbBrowser = "Super, W";
-      kbEditor = "Super, C";
-      kbFileExplorer = "Super, E";
-      kbSession = "Ctrl+Alt, Delete";
-      kbClearNotifs = "Ctrl+Alt, C";
-      kbShowPanels = "Super, K";
-      kbLock = "Super, L";
-      kbRestoreLock = "Super+Alt, L";
-    };
-in upstreamVars
+    else
+      lib.warn "caelestia-nixos: upstream hypr/variables.conf not found, using fallback defaults" {
+        terminal = "foot";
+        browser = "firefox";
+        editor = "codium";
+        fileExplorer = "thunar";
+        touchpadDisableTyping = true;
+        touchpadScrollFactor = 0.3;
+        workspaceSwipeFingers = 4;
+        gestureFingers = 3;
+        gestureFingersMore = 4;
+        blurEnabled = true;
+        blurSpecialWs = false;
+        blurPopups = true;
+        blurInputMethods = true;
+        blurSize = 8;
+        blurPasses = 2;
+        blurXray = false;
+        shadowEnabled = true;
+        shadowRange = 20;
+        shadowRenderPower = 3;
+        shadowColour = "rgba($surfaced4)";
+        workspaceGaps = 20;
+        windowGapsIn = 10;
+        windowGapsOut = 40;
+        singleWindowGapsOut = 20;
+        windowOpacity = 0.95;
+        windowRounding = 10;
+        windowBorderSize = 3;
+        activeWindowBorderColour = "rgba($primarye6)";
+        inactiveWindowBorderColour = "rgba($onSurfaceVariant11)";
+        volumeStep = 10;
+        cursorTheme = "Sweet-cursors";
+        cursorSize = 24;
+        kbMoveWinToWs = "Super+Alt";
+        kbMoveWinToWsGroup = "Ctrl+Super+Alt";
+        kbGoToWs = "Super";
+        kbGoToWsGroup = "Ctrl+Super";
+        kbNextWs = "Ctrl+Super, right";
+        kbPrevWs = "Ctrl+Super, left";
+        kbToggleSpecialWs = "Super, S";
+        kbWindowGroupCycleNext = "Alt, Tab";
+        kbWindowGroupCyclePrev = "Shift+Alt, Tab";
+        kbUngroup = "Super, U";
+        kbToggleGroup = "Super, Comma";
+        kbMoveWindow = "Super, Z";
+        kbResizeWindow = "Super, X";
+        kbWindowPip = "Super+Alt, Backslash";
+        kbPinWindow = "Super, P";
+        kbWindowFullscreen = "Super, F";
+        kbWindowBorderedFullscreen = "Super+Alt, F";
+        kbToggleWindowFloating = "Super+Alt, Space";
+        kbCloseWindow = "Super, Q";
+        kbSystemMonitor = "Ctrl+Shift, Escape";
+        kbMusic = "Super, M";
+        kbCommunication = "Super, D";
+        kbTodo = "Super, R";
+        kbTerminal = "Super, T";
+        kbBrowser = "Super, W";
+        kbEditor = "Super, C";
+        kbFileExplorer = "Super, E";
+        kbSession = "Ctrl+Alt, Delete";
+        kbClearNotifs = "Ctrl+Alt, C";
+        kbShowPanels = "Super, K";
+        kbLock = "Super, L";
+        kbRestoreLock = "Super+Alt, L";
+      };
+in
+upstreamVars

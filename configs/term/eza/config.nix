@@ -1,4 +1,4 @@
-{dots, ...}: {
+{ dots, ... }: {
   enableFishIntegration = dots.term.fish._meta.active;
 
   colors = "always";

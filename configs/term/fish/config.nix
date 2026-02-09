@@ -1,4 +1,4 @@
-{use, ...}: {
+{ use, ... }: {
   # Raw attrs mapped to programs.fish
 
   enable = true;

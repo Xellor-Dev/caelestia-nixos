@@ -1,9 +1,8 @@
-{
-  path,
-  mods,
-  ...
+{ path
+, mods
+, ...
 }:
 with mods; [
-  (mkPassMod path ["shell"])
-  (mkPassMod path ["cli"])
+  (mkPassMod path [ "shell" ])
+  (mkPassMod path [ "cli" ])
 ]

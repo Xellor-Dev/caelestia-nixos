@@ -123,7 +123,8 @@ let
     lock = [ "loginctl" "lock-session" ];
   };
 
-in {
+in
+{
   inherit
     mkScaleOpt mkToggleOpt mkDragThresholdOpt mkEntry mkAction sessionCommands
     barEntryType launcherActionType batteryWarnLevelType idleTimeoutType

@@ -14,18 +14,17 @@
 # `mod` — это resolved shell-конфиг (general, bar, paths, appearance, ...),
 # что соответствует содержимому shell.json → кладём в settings.
 #
-{
-  config,
-  lib,
-  pkgs,
-  mod,
-  ...
+{ config
+, lib
+, pkgs
+, mod
+, ...
 }: {
   config = {
     programs.caelestia.settings = mod;
 
     # Скрипт активации: преобразует symlink на readonly файл в редактируемую копию
-    home.activation.caelestiaConfigWritable = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    home.activation.caelestiaConfigWritable = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       mkdir -p "$HOME/.config/caelestia"
       CONFIG_FILE="$HOME/.config/caelestia/shell.json"
       

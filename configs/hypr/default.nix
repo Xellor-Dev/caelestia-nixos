@@ -1,21 +1,20 @@
-{
-  config,
-  lib,
-  mod,
-  path,
-  mods,
-  pkgs,
-  use,
-  ...
+{ config
+, lib
+, mod
+, path
+, mods
+, pkgs
+, use
+, ...
 }: {
   # Hypr module
 
   imports = with mods; [
-    (mkRawMod path ["variables"]) # variables.conf
-    (mkRawMod path ["scheme"]) # scheme/default.conf
-    (mkNode path ["hyprland"])
+    (mkRawMod path [ "variables" ]) # variables.conf
+    (mkRawMod path [ "scheme" ]) # scheme/default.conf
+    (mkNode path [ "hyprland" ])
   ];
-  
+
   options = with lib; {
     programs.caelestia-dots.hypr.services = {
       gnomeKeyring = {
@@ -37,7 +36,7 @@
       };
     };
   };
-  
+
   config = {
     assertions = [
       {
@@ -45,13 +44,13 @@
         message = "hyprland must be enabled in wayland.windowManager to use caelestia hypr module";
       }
     ];
-    
+
     wayland.systemd.target = lib.mkDefault "hyprland-session.target";
     wayland.windowManager.hyprland = lib.mkIf config.programs.caelestia-dots.hypr.enable {
       enable = true;
       sourceFirst = false;
       settings = mod.settings;
-      systemd.variables = with lib; map (env: head (splitString "," env)) (use "hypr.hyprland.env" "env" []);
+      systemd.variables = with lib; map (env: head (splitString "," env)) (use "hypr.hyprland.env" "env" [ ]);
     };
 
     services = {
@@ -71,7 +70,7 @@
       gtk.enable = true;
       package =
         lib.mkIf (mod.variables.cursorTheme == "Sweet-cursors")
-        pkgs.sweet-nova;
+          pkgs.sweet-nova;
     };
   };
 }

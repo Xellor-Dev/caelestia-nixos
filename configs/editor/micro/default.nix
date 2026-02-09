@@ -1,9 +1,8 @@
-{
-  config,
-  lib,
-  pkgs,
-  mod,
-  ...
+{ config
+, lib
+, pkgs
+, mod
+, ...
 }: {
   config = {
     programs.micro = {

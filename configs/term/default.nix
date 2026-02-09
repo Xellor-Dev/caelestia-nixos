@@ -1,7 +1,6 @@
-{
-  path,
-  mods,
-  ...
+{ path
+, mods
+, ...
 }:
 with mods; [
   (mkPassMod path "fish")
