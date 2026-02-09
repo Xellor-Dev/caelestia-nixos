@@ -40,7 +40,7 @@ caelestia-dots repo (upstream)          caelestianix (this module)           You
 
 ## Quick Start
 
-### 1. Add to `flake.nix`
+### Step 1: Add caelestianix to your `flake.nix`
 
 ```nix
 {
@@ -55,44 +55,194 @@ caelestia-dots repo (upstream)          caelestianix (this module)           You
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
+
+  outputs = { self, nixpkgs, home-manager, caelestianix }:
+    let
+      username = "youruser";
+      system = "x86_64-linux";
+    in {
+      homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.${system};
+        modules = [
+          caelestianix.homeManagerModules.default
+          ./home.nix
+        ];
+      };
+    };
 }
 ```
 
-### 2. Include the module
+### Step 2: Configure `home.nix`
 
 ```nix
-home-manager.users.youruser = {
-  imports = [
-    caelestianix.homeManagerModules.default
-  ];
-};
-```
+{ config, pkgs, ... }:
 
-### 3. Enable what you need in `home.nix`
-
-```nix
 {
   programs.caelestia-dots = {
     enable = true;
 
-    hypr.enable = true;       # Hyprland: keybinds, animations, rules, colors, variables
-    editor.enable = true;     # VSCode/Zed/Micro with caelestia theme
-    term.enable = true;       # Fish + Starship + Eza
-    btop.enable = true;       # System monitor
-    foot.enable = true;       # Terminal emulator
-    caelestia.enable = true;  # Caelestia shell & CLI (enabled by default)
+    # Enable the modules you want (caelestia is enabled by default)
+    hypr.enable = true;       # Hyprland: all keybinds, colors, animations, etc from upstream
+    editor.enable = true;     # VSCode/Zed/Micro from upstream
+    term.enable = true;       # Fish + Starship + Eza from upstream
+    btop.enable = true;       # System monitor from upstream
+    foot.enable = true;       # Terminal emulator from upstream
   };
+
+  # Rest of your Home Manager config (home.username, home.homeDirectory, etc)
 }
 ```
 
-### 4. Stay updated
+### Step 3: Build and switch
 
 ```bash
-nix flake update         # pulls latest caelestia-dots + nixpkgs
-home-manager switch      # rebuilds with new upstream configs
+# Build your Home Manager configuration
+home-manager switch
+
+# That's it! Your system now has:
+# - Hyprland with all upstream keybinds, animations, color scheme, variables
+# - All Nix store paths automatically substituted (hyprpicker, wpctl, etc)
+# - Terminal configured exactly like upstream (starship, fish aliases)
+# - Editors (VSCode with GitHub Copilot if enabled)
+# - System monitor (btop)
 ```
 
-That's it. No install scripts, no `git pull` into `~/.config`, no manual syncing.
+### Step 4: Stay updated
+
+```bash
+# Pull latest caelestia-dots + nixpkgs updates
+nix flake update
+
+# Rebuild Home Manager
+home-manager switch
+
+# Done! All upstream changes are now applied to your system
+```
+
+---
+
+## The Complete Workflow
+
+### Scenario: You discover caelestia-dots and want it on NixOS
+
+**Without caelestianix (traditional approach — doesn't work on NixOS):**
+
+```bash
+# Clone caelestia-dots
+git clone https://github.com/caelestia-dots/caelestia ~/.config/caelestia
+
+# Run install script
+cd ~/.config/caelestia
+./install.sh
+
+# Manual steps to make paths work on NixOS (lots of breakage)
+# Manually update when upstream changes
+# No declarative config, hard to version control
+```
+
+**With caelestianix (NixOS-native approach):**
+
+```bash
+# 1. Create flake.nix with caelestianix input (done once)
+# 2. Create home.nix with programs.caelestia-dots config (done once)
+
+# 3. Apply the configuration
+home-manager switch
+
+# 4. Get updates (whenever you want)
+nix flake update
+home-manager switch
+
+# Everything is:
+# - Declaratively defined in Nix
+# - Version controlled (flake.lock locks all versions)
+# - Reproducible (can recreate the same system on another machine)
+# - Easy to customize (override anything with infuse.nix)
+```
+
+### What happens when you run `home-manager switch`
+
+1. **Parse upstream configs** → caelestianix reads from caelestia-dots flake input
+    - `hypr/hyprland/*.conf` → parsed into Nix attrsets
+    - `hypr/variables.conf` → 58 variables extracted
+    - `hypr/scheme/default.conf` → 106 color tokens loaded
+    - `starship/starship.toml` → TOML parsed
+    - `vscode/settings.json` → JSON parsed
+    - etc.
+
+2. **Substitute Nix store paths** → commands replaced with real paths
+
+    ```
+    hyprpicker  →  /nix/store/...-hyprpicker-0.4.5/bin/hyprpicker
+    wpctl       →  /nix/store/...-wireplumber-0.4.X/bin/wpctl
+    notify-send →  /nix/store/...-libnotify-0.X/bin/notify-send
+    ```
+
+3. **Merge with your overrides** → infuse.nix combines upstream with your settings
+
+    ```nix
+    hypr.hyprland.keybinds.settings.bind.__append = [
+      "SUPER, Return, exec, footclient"  # Your custom keybind
+    ];
+    # Now you have all upstream keybinds PLUS your custom one
+    ```
+
+4. **Generate Home Manager configuration** → all files written to `~/.config/`
+
+    ```
+    ~/.config/hypr/hyprland.conf  (generated from parsed upstream + your overrides)
+    ~/.config/hypr/variables.conf
+    ~/.config/hypr/hyprlandcolor.conf
+    ~/.config/foot/foot.ini
+    ~/.config/starship.toml
+    ~/.config/Code/User/settings.json
+    ...
+    ```
+
+5. **Activate** → Home Manager manages the files
+
+### Example: You want to add a custom keybind
+
+```nix
+# home.nix
+programs.caelestia-dots = {
+  enable = true;
+  hypr.enable = true;
+
+  # Add your keybind to upstream ones (don't override, just append)
+  hypr.hyprland.keybinds.settings.bind.__append = [
+    "SUPER, Return, exec, footclient"  # Your custom bind
+  ];
+};
+```
+
+```bash
+home-manager switch
+```
+
+Result: You now have **all 95+ upstream keybinds** from caelestia-dots PLUS your custom keybind.
+
+No forking. No copy-paste. Just one line.
+
+### Example: You want to customize the color scheme
+
+```nix
+programs.caelestia-dots = {
+  enable = true;
+  hypr.enable = true;
+
+  # Override a specific color (keeps rest from upstream)
+  hypr.scheme.settings.colors.base00.__override = "#000000";  # Pure black instead
+};
+```
+
+```bash
+home-manager switch
+```
+
+Result: Color scheme is mostly from upstream with your one custom color.
+
+---
 
 ## Modules
 
