@@ -40,35 +40,31 @@ This fork extends the original caelestia-nix with:
 
 ## 🚀 Installation
 
+**📖 Full installation guide:** See [INSTALLATION.md](docs/INSTALLATION.md)
+
 Add `caelestianix` and `home-manager` as inputs to your flake, then include the module in your home configuration.
 
-### Example `flake.nix`:
+### Quick Start
+
+1. Add to your `flake.nix`:
 
 ```nix
-{
-  description = "My NixOS configuration with caelestianix";
-
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager";
-    caelestianix.url = "github:Xellor-Dev/caelestia-nixos";
-  };
-
-  outputs = { self, nixpkgs, home-manager, caelestianix, ... }@inputs:
-    let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
-    in {
-      homeConfigurations."user@nixos" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-          caelestianix.homeManagerModules.default
-        ];
-      };
-    };
-}
+caelestianix = {
+  url = "github:Xellor-Dev/caelestia-nixos";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
 ```
+
+2. Include in Home Manager modules:
+
+```nix
+modules = [
+  ./home.nix
+  caelestianix.homeManagerModules.default
+];
+```
+
+3. Configure in `home.nix` (see below)
 
 ### Basic `home.nix`:
 
@@ -79,13 +75,94 @@ Add `caelestianix` and `home-manager` as inputs to your flake, then include the 
   programs.caelestia-dots = {
     enable = true;
 
-    # Optional: enable specific components
-    hypr.enable = true;
-    editor.vscode.enable = true;
-    term.enable = true;
-    btop.enable = true;
+    # Optional: enable specific components (all default to false except caelestia)
+    hypr = {
+      enable = true;
+    };
+
+    editor = {
+      enable = true;
+    };
+
+    term = {
+      enable = true;
+    };
+
+    btop = {
+      enable = true;
+    };
+
+    foot = {
+      enable = true;
+    };
+
+    caelestia = {
+      enable = true;  # Caelestia shell (enabled by default)
+    };
   };
 }
+```
+
+## Module Configuration
+
+Each module can be independently enabled or disabled. Below are the available modules:
+
+### Hyprland (`hypr`)
+
+```nix
+programs.caelestia-dots.hypr = {
+  enable = true;
+
+  # Configure which services to enable (all default to true)
+  services = {
+    gnomeKeyring.enable = true;
+    polkitGnome.enable = true;
+    gammastep = {
+      enable = true;
+      provider = "geoclue2";  # or "manual"
+    };
+    cliphist.enable = true;
+  };
+};
+```
+
+### Editors (`editor`)
+
+```nix
+programs.caelestia-dots.editor = {
+  enable = true;
+
+  # Configure individual editors
+  vscode.enable = true;
+  zed.enable = true;
+  micro.enable = true;
+};
+```
+
+### Terminal (`term`)
+
+```nix
+programs.caelestia-dots.term.enable = true;
+```
+
+### System Monitor (`btop`)
+
+```nix
+programs.caelestia-dots.btop.enable = true;
+```
+
+### Terminal Emulator (`foot`)
+
+```nix
+programs.caelestia-dots.foot.enable = true;
+```
+
+### Caelestia Shell (`caelestia`)
+
+```nix
+programs.caelestia-dots.caelestia = {
+  enable = true;  # Enabled by default
+};
 ```
 
 ## ⚙️ Customization
@@ -166,12 +243,53 @@ This project inherits the license from the original caelestia-nix project.
 
 ---
 
-<br>
+## ✅ Requirements
 
-You can configure like you configure any other module option, but you have extras: **sugars**. For deeper instructions, read [CUSTOMIZATION](docs/CUSTOMIZATION.md)
+- **NixOS 23.05 or newer**
+- **Flakes enabled** in nix.conf
+- **Home Manager** configured
+- **x86_64-linux** system (aarch64-linux support planned)
+- **Wayland environment** (for Hyprland module)
 
-## Thanks
+---
 
-- [caelestia-dots](https://github.com/caelestia-dots/caelestia), awesome dotfiles and shell
-- [infuse.nix](https://codeberg.org/amjoseph/infuse.nix), greatly enhances customization
+## 📚 Documentation
 
+- **[INSTALLATION.md](docs/INSTALLATION.md)** - Complete step-by-step installation guide
+- **[CUSTOMIZATION.md](docs/CUSTOMIZATION.md)** - Advanced customization and module options
+- **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Solutions to common problems
+- **[FAQ.md](docs/FAQ.md)** - Frequently asked questions
+- **[Examples](examples/)** - Ready-to-use configuration examples
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
+
+---
+
+## 🐛 Troubleshooting
+
+Having issues? Check the [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) guide for solutions to common problems.
+
+**Common Issues:**
+
+- "hyprland must be enabled" → See [Troubleshooting: Hyprland](docs/TROUBLESHOOTING.md#error-hyprland-must-be-enabled-in-waylandwindowmanagerhydrland-to-use-caelestia-hypr-module)
+- "Copilot not working" → See [Troubleshooting: Copilot](docs/TROUBLESHOOTING.md#copilot-not-working-in-vscode)
+- Keybinds not working → See [Troubleshooting: Keybinds](docs/TROUBLESHOOTING.md#keybinds-not-working)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Whether it's bug reports, documentation improvements, or new features:
+
+1. **Report bugs** - Open an [issue](https://github.com/Xellor-Dev/caelestia-nixos/issues)
+2. **Suggest features** - Start a [discussion](https://github.com/Xellor-Dev/caelestia-nixos/discussions)
+3. **Submit PRs** - Fork and create a pull request
+
+---
+
+## 📞 Support
+
+- **GitHub Issues** - For bugs and feature requests
+- **GitHub Discussions** - For general questions
+- **caelestia-dots community** - For caelestia-specific questions
+
+---

@@ -1,17 +1,23 @@
-{...}: {
-  gestures = {
-    workspace_swipe_distance = 700;
-    workspace_swipe_cancel_ratio = 0.15;
-    workspace_swipe_min_speed_to_force = 5;
-    workspace_swipe_direction_lock = true;
-    workspace_swipe_direction_lock_threshold = 10;
-    workspace_swipe_create_new = true;
-  };
+{lib, upstream, ...}: let
+  parser = import ../hyprconf-parser.nix {inherit lib;};
 
-  gesture = [
-    "$workspaceSwipeFingers, horizontal, workspace"
-    "$gestureFingers, up, special, special"
-    "$gestureFingers, down, dispatcher, exec, caelestia toggle specialws"
-    "$gestureFingersMore, down, dispatcher, exec, systemctl suspend-then-hibernate"
-  ];
-}
+  upstreamConf =
+    if upstream != null && builtins.pathExists "${upstream}/hypr/hyprland/gestures.conf"
+    then parser.parseSections (builtins.readFile "${upstream}/hypr/hyprland/gestures.conf")
+    else lib.warn "caelestia-nixos: upstream hypr/hyprland/gestures.conf not found, using fallback defaults" {
+      gestures = {
+        workspace_swipe_distance = "700";
+        workspace_swipe_cancel_ratio = "0.15";
+        workspace_swipe_min_speed_to_force = "5";
+        workspace_swipe_direction_lock = "true";
+        workspace_swipe_direction_lock_threshold = "10";
+        workspace_swipe_create_new = "true";
+      };
+      gesture = [
+        "$workspaceSwipeFingers, horizontal, workspace"
+        "$gestureFingers, up, special, special"
+        "$gestureFingers, down, dispatcher, exec, caelestia toggle specialws"
+        "$gestureFingersMore, down, dispatcher, exec, systemctl suspend-then-hibernate"
+      ];
+    };
+in upstreamConf

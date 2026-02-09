@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  upstream,
   ...
 }: let
   copilotPatchFilter = pkgs.writeText "copilot-patch.jq" ''
@@ -80,98 +81,37 @@ in {
 
   # Using a profile other than default probably will break the caelestia-integration extension
   profiles.default = {
-    userSettings = {
-      "[c]" = {
-        "editor.defaultFormatter" = "llvm-vs-code-extensions.vscode-clangd";
-      };
-      "[cpp]" = {
-        "editor.defaultFormatter" = "llvm-vs-code-extensions.vscode-clangd";
-      };
-      "[python]" = {
-        "editor.defaultFormatter" = "charliermarsh.ruff";
-      };
-      "codeium.enableCodeLens" = false;
-      "codeium.enableConfig" = {
-        "*" = true;
-        fish = true;
-        qml = true;
-      };
-      "chat.disableAIFeatures" = false;
-      "diffEditor.hideUnchangedRegions.enabled" = true;
-      "doxdocgen.generic.boolReturnsTrueFalse" = false;
-      "editor.codeActionsOnSave" = {
-        "source.organizeImports" = "explicit";
-      };
-      "editor.cursorSmoothCaretAnimation" = "on";
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
-      "editor.fontLigatures" = true;
-      "editor.formatOnSave" = true;
-      "editor.inlayHints.enabled" = "off";
-      "editor.minimap.autohide" = "mouseover";
-      "editor.multiCursorModifier" = "ctrlCmd";
-      "editor.renderWhitespace" = "trailing";
-      "editor.smoothScrolling" = true;
-      "editor.suggestSelection" = "recentlyUsedByPrefix";
-      "git.enableSmartCommit" = true;
-      "github.copilot.enable" = {
-        "*" = true;
-      };
-      "github.copilot.advanced.authProvider" = "github";
-      "github.copilot.editor.enableAutoCompletions" = true;
-      "github.copilot.chat.enabled" = true;
-      "javascript.preferences.importModuleSpecifierEnding" = "minimal";
-      "prettier.arrowParens" = "avoid";
-      "prettier.printWidth" = 120;
-      "prettier.tabWidth" = 4;
-      "python.languageServer" = "Pylance";
-      "qt-qml.doNotAskForQmllsDownload" = true;
-      # "qt-qml.qmlls.additionalImportPaths" = ["/usr/lib/qt6/qml"];
-      # "qt-qml.qmlls.customExePath" = "${pkgs.kdePackages.qtdeclarative}/qmlls";
-      "ruff.lineLength" = 120;
-      "security.workspace.trust.startupPrompt" = "always";
-      "terminal.integrated.enableMultiLinePasteWarning" = "never";
-      "terminal.integrated.smoothScrolling" = true;
-      "typescript.preferences.importModuleSpecifierEnding" = "minimal";
-      "typescript.preferences.preferTypeOnlyAutoImports" = true;
-      "workbench.colorTheme" = "Caelestia";
-      "workbench.iconTheme" = "catppuccin-mocha"; # This will not change automatically for light mode
-      "workbench.list.smoothScrolling" = true;
-    };
+    userSettings =
+      let
+        settingsJsonPath =
+          if upstream != null
+          then "${upstream}/vscode/settings.json"
+          else null;
+      in
+        if settingsJsonPath != null && builtins.pathExists settingsJsonPath then
+          builtins.fromJSON (builtins.readFile settingsJsonPath)
+        else
+          lib.warn "caelestia-dots: upstream vscode/settings.json not found, using minimal defaults." {
+            "workbench.colorTheme" = "Caelestia";
+            "workbench.iconTheme" = "catppuccin-mocha";
+          };
 
-    keybindings = [
-      {
-        command = "workbench.action.reloadWindow";
-        key = "ctrl+shift+alt+r";
-      }
-      {
-        command = "workbench.action.previousEditor";
-        key = "ctrl+pageup";
-      }
-      {
-        command = "workbench.action.nextEditor";
-        key = "ctrl+pagedown";
-      }
-      {
-        command = "editor.action.moveLinesUpAction";
-        key = "ctrl+shift+up";
-        when = "editorTextFocus && !editorReadonly";
-      }
-      {
-        command = "editor.action.moveLinesDownAction";
-        key = "ctrl+shift+down";
-        when = "editorTextFocus && !editorReadonly";
-      }
-      {
-        command = "editor.action.insertCursorAbove";
-        key = "shift+alt+up";
-        when = "editorTextFocus";
-      }
-      {
-        command = "editor.action.insertCursorBelow";
-        key = "shift+alt+down";
-        when = "editorTextFocus";
-      }
-    ];
+    keybindings =
+      let
+        keybindingsJsonPath =
+          if upstream != null
+          then "${upstream}/vscode/keybindings.json"
+          else null;
+      in
+        if keybindingsJsonPath != null && builtins.pathExists keybindingsJsonPath then
+          builtins.fromJSON (builtins.readFile keybindingsJsonPath)
+        else
+          lib.warn "caelestia-dots: upstream vscode/keybindings.json not found, using minimal defaults." [
+            {
+              command = "workbench.action.reloadWindow";
+              key = "ctrl+shift+alt+r";
+            }
+          ];
 
     extensions = with pkgs.vscode-extensions; [
       catppuccin.catppuccin-vsc-icons

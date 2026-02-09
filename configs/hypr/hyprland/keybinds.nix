@@ -4,13 +4,47 @@
   pkgs,
   dots,
   use,
+  upstream,
   ...
 }: let
+  parser = import ../hyprconf-parser.nix {inherit lib;};
+  
   caelestia = "${dots.caelestia.cli.package}/bin/caelestia";
   app2unit = "${pkgs.app2unit}/bin/app2unit";
   hyprpicker = "${pkgs.hyprpicker}/bin/hyprpicker";
   ydotool = "${pkgs.ydotool}/bin/ydotool";
-in {
+  
+  # Подстановка Nix store путей в команды из upstream
+  substituteCommands = text: let
+    replacements = [
+      { from = "caelestia"; to = caelestia; }
+      { from = "app2unit"; to = app2unit; }
+      { from = "hyprpicker"; to = hyprpicker; }
+      { from = "ydotool"; to = ydotool; }
+      { from = "notify-send"; to = "${pkgs.libnotify}/bin/notify-send"; }
+      { from = "cliphist"; to = "${pkgs.cliphist}/bin/cliphist"; }
+      { from = "wpctl"; to = "${pkgs.wireplumber}/bin/wpctl"; }
+      { from = "systemctl"; to = "${pkgs.systemd}/bin/systemctl"; }
+      { from = "pkill"; to = "${pkgs.procps}/bin/pkill"; }
+      { from = "sleep"; to = "${pkgs.coreutils}/bin/sleep"; }
+    ];
+    # Применяем все замены последовательно
+    applyReplacement = acc: r: 
+      builtins.replaceStrings [" ${r.from} " ", ${r.from} " "exec, ${r.from} " "exec ${r.from} "] 
+                               [" ${r.to} " ", ${r.to} " "exec, ${r.to} " "exec ${r.to} "] 
+                               acc;
+  in builtins.foldl' applyReplacement text replacements;
+  
+  
+  upstreamConf =
+    if upstream != null && builtins.pathExists "${upstream}/hypr/hyprland/keybinds.conf"
+    then let
+      rawConf = builtins.readFile "${upstream}/hypr/hyprland/keybinds.conf";
+      # Заменяем команды на Nix store пути
+      substituted = substituteCommands rawConf;
+      # Парсим уже с Nix путями
+    in parser.parseSections substituted
+    else lib.warn "caelestia-nixos: upstream hypr/hyprland/keybinds.conf not found, using fallback defaults" {
   # Submaps must be placed first
   _1submap = {
     exec = ["hyprctl dispatch submap global"];
@@ -186,4 +220,6 @@ in {
     ", XF86AudioRaiseVolume, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; wpctl set-volume -l ${lib.strings.floatToString (use "caelestia.shell" "settings.services.maxVolume" 1)} @DEFAULT_AUDIO_SINK@ $volumeStep%+"
     ", XF86AudioLowerVolume, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; wpctl set-volume @DEFAULT_AUDIO_SINK@ $volumeStep%-"
   ];
-}
+};
+in
+  use upstreamConf

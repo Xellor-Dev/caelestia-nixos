@@ -1,4 +1,4 @@
-{lib}: let
+{lib, upstream ? null}: let
   types = import ./types.nix {inherit lib;};
 
   mods = rec {
@@ -27,7 +27,7 @@
           mod_dir = lib.path.append root (lib.path.subpath.join path); # directory where the module is stored
 
           module_args = {
-            inherit config lib pkgs mod options path mods dots withMod use ifActive;
+            inherit config lib pkgs mod options path mods dots withMod use ifActive upstream;
           };
           module_fun =
             if module != null
@@ -39,7 +39,7 @@
 
           # the default config of module, imported directly from `mod_path` / config.nix if `cfg` is null
           default = let
-            cfg_args = {inherit config lib pkgs options mod dots withMod use ifActive;};
+            cfg_args = {inherit config lib pkgs options mod dots withMod use ifActive upstream;};
           in
             if cfg != null
             then cfg cfg_args

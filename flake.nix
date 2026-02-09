@@ -8,6 +8,10 @@
       url = "github:caelestia-dots/shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    caelestia-dots = {
+      url = "github:caelestia-dots/caelestia";
+      flake = false;
+    };
   };
   outputs = inputs: {
     homeManagerModules.default = import ./caelestia.nix inputs;
