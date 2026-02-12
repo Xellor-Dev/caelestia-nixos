@@ -5,7 +5,7 @@
 , ...
 }: {
   config = {
-    programs.caelestia.enable = true;
+    #programs.caelestia.enable = true;
     programs.caelestia.cli = mod;
 
     # Theme config (only gtk for now since CLI's qt config depends on qt*ct-kde)
